@@ -33,8 +33,8 @@ type uint8_view = (int, int8_unsigned_elt, c_layout) Array1.t
 type uint16_view = (int, int16_unsigned_elt, c_layout) Array1.t
 type uint32_view = (int32, int32_elt, c_layout) Array1.t
 type uint64_view = (int64, int64_elt, c_layout) Array1.t
-type float32_view = (float, float32_elt, c_layout) Array1.t
-type float64_view = (float, float64_elt, c_layout) Array1.t
+type float32_view = (int32, int32_elt, c_layout) Array1.t
+type float64_view = (int64, int64_elt, c_layout) Array1.t
 
 let view : memory -> ('c, 'd, c_layout) Array1.t = Obj.magic
 
@@ -105,8 +105,8 @@ let load mem a memty valty =
     | UInt32Mem, Int64Type ->
       Int64 (int64_of_int32_u (view buf : uint32_view).{0})
     | UInt64Mem, Int64Type -> Int64 (view buf : uint64_view).{0}
-    | Float32Mem, Float32Type -> Float32 (view buf : float32_view).{0}
-    | Float64Mem, Float64Type -> Float64 (view buf : float64_view).{0}
+    | Float32Mem, Float32Type -> Float32 (Float32.of_bits (view buf : float32_view).{0})
+    | Float64Mem, Float64Type -> Float64 (Float64.of_bits (view buf : float64_view).{0})
     | _ -> raise Type
   with Invalid_argument _ -> raise Bounds
 
@@ -128,8 +128,8 @@ let store mem a memty v =
     | UInt32Mem, Int32 x -> (view buf : uint32_view).{0} <- x
     | UInt32Mem, Int64 x -> (view buf : uint32_view).{0} <- Int64.to_int32 x
     | UInt64Mem, Int64 x -> (view buf : uint64_view).{0} <- x
-    | Float32Mem, Float32 x -> (view buf : float32_view).{0} <- x
-    | Float64Mem, Float64 x -> (view buf : float64_view).{0} <- x
+    | Float32Mem, Float32 x -> (view buf : float32_view).{0} <- Float32.to_bits x
+    | Float64Mem, Float64 x -> (view buf : float64_view).{0} <- Float64.to_bits x
     | _ -> raise Type);
     Array1.blit (Array1.sub buf 0 sz) (Array1.sub mem a sz)
   with Invalid_argument _ -> raise Bounds
